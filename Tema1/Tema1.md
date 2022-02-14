@@ -86,6 +86,8 @@ Si usamos `whereis sqlplus` nos da la ruta donde está el SQLplus.
 
 Cuando estamos conectados como un usuario es `SQL>`. Pero lo que haremos es cambiarlo para el usuario y la instancia. En un scrip podemos personalizarlos en un Script.
 
+* Usar el comando `sudo rm -rf /tmp/rlwrap.debug`
+
 ## Personalizar Promp
 
 ```
@@ -176,5 +178,146 @@ Si quisieramos hacerlo con un usuario que no tiene a nivel SO entonces marca err
 Para hacerlo tendriamos que cambiar al usuario Oracle, ese si nos permitirá hacerlo.
 
 <div><img src="imagenes/siSO.png"></div>
+
+
+## Formato de salida
+
+|Comando|Función|
+|---|---|
+|`set linesize window`|Permite establecer un linesize para la ventana|
+|`col username format a20`|Establece un valor de a20 para la sesión|
+|`col last_login format a40`|Mostrará la fecha de login en formato a40.Cuando no sale nada es porque aun no se autentica.|
+
+* El comando `col` sólo se usa con VARCHAR, para valores númericos esto puede causar cosas raras.
+
+* Consulta a una vista `select username, sysdba, sysoper, sysback, last_login from v$pwfile_users`
+
+* Todos los ejecutables se encuentran en la ruta `bin`, uno de ellos es la misma base de datos, el sqlplus. Todas las utilerias y programas de la base se encuentran ahí, incluidos el archivo `ora.pwd`
+
+## Ejercicio 4 perdida del archivo de passwords
+
+Simulación de la perdida de el archivo de passwords.
+
+1. Para ello primero hay que detener la base de datos.
+
+    Con el comando `shutdown`
+
+2. Conectarse como usuario `oracle`
+
+3. Crear la carpeta `backups`. Normalmente debe usarse esta carpeta para almacenar algo importante. Por ejemplo la creación de los spools.
+
+4. Mover el archivo de passwords a backup con el comando `mv orapwymmdba1 /home/oracle/backups`
+
+    a. ¿Que pasa si no existe? pero queremos autenticar? 
+
+      Si es posible usar `sqlplus / as sysdba` y permite autenticar porque estamos via **SO**, incluso al poner el comando `show user`. Eh incluso podemos levantar la instancia con este mismo usuario.
+
+
+    b. ¿Levanta la instancia? Sí
+
+    c. ¿Que pasa si realizamos la consulta de la vista?
+
+      `desc v$pwfile users`
+      `select username, sysdba, sysbackup from v$pwfile users;`
+
+      Esta ultima vista nos muestra que no hay registros, pero nisiquiera el archivo `sys` existe. **Es importante saber que el archivo de passwords es el que alimenta esta vista**
+
+      Si intentamos acceder mediante el usuario normal mediante el comando `sqlplus sys as sysdba` nos pedirá la contraseña y seguirá pidiendo siempre contraseña porque no logra acceder. 
+
+      Suponga que el archivo de passwords se pierde, el archivo de passwords ¿Podrá autenticar un usuario no admin? Cierto mediante el diccionario de datos. (tiene todas las contraseñas de todos los usuarios que no tienen privilegio de administracion)
+
+      Al perder el archivo de passwords los usuarios con permisos administrativos no pueden autenticar.
+
+5. Mediante la carpeta `/unam-bda` (Los directorios `/home` son privados para cada usuario por lo que puede causar problemas de permisos). 
+    * Oracle no tiene el comando **sudo** y es mala práctica ponerle poder a nivel SO.
+
+    * Cambiando a raiz con el usuario administrador
+      
+      ````
+      cd /
+      
+      sudo mkdir unam-bda
+      
+      chmod 744    #Significa que root podrá hacer cualquier cosa, cualquier otro usuario y grupo podrán leer pero no ejecutar ni escribir.
+
+      cd unam-bda
+
+      sudo mkdir apuntes
+
+      ll  #Permite lista con permisos
+
+      sudo chown jorge:jorge apuntes
+
+      sudo chmod 755 apuntes #Sirve para darle permiso a Oracle de ejecutar
+
+      ll
+
+      cd apuntes/
+      ls
+
+      mkdir tema01
+
+      ll
+
+      chmod 755 tema01
+
+      cd tema01
+
+      ls
+
+      code restaura-archivo-pwd.sh  #Se usará shell script porque usara un comando de SO
+
+      ```
+
+6. Creando el comando SH.
+7. Ejecutar el script mediante el usuario **Oracle** porque están en la carpeta que está dentro de $ORACLE_HOME 
+
+    ```
+    su -l oracle
+    ls
+    cd tema01/
+
+    ls
+
+    ll
+
+    #En primera instancia por permisos no podrá ejecutarlo por permisos.
+    ```
+
+    * Pero el usuario no puede tampoco puede ejecutar el script porque permisos en este caso nisiquiera el dueño tiene permisos de ejecución porque se tienen `-rw-rw-r--`
+
+    * Se deben cambiar los permisos.
+      `chmod 755 restaura-archivo-pwd.sh`
+
+    * Para darnos cuenta que podemos ejecutar, usamos `ll` y aparecerá en color verde.
+
+    * Ejecutar el ejecutable: `./restaura-archivo-pwd.sh`
+
+    * Cuando se anda ejecutando no permitirá meter una contraseña menor a 8 char, por ejemplo, podemos usar `Hola1234#`
+
+8. Intentando autenticar con el archivo de password: `sqlplus sys/Hola1234# /as sysdba` Sólo por esta ocasión ponemos este password ahí.
+
+    * Si hacemos consulta a la vista
+    ```
+    col usrname format a20
+    col last_login format a40
+    set linesize window
+
+    run
+    select username,sysdba,sysoper,sysbackup,last_login from v$pwfile_users
+    ```
+
+    * Cambiando el password del usuario.
+      `alter user`
+
+
+## Formas de autenticar
+
+|||
+|||
+|`sqlplus yanni/password`|Se autentica mediante Diccionario de datos|
+|`su -l yanni \n  sqlplus sys as sysdba`|Mediante archivo de passwords|
+|``|Autenticación mediante Sistema operativo sólo si estamos como Oracle|
+
 
 `https://codeshare.io/9OQRL8`
