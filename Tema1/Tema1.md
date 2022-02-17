@@ -319,5 +319,113 @@ Simulación de la perdida de el archivo de passwords.
 |`su -l yanni \n  sqlplus sys as sysdba`|Mediante archivo de passwords|
 |``|Autenticación mediante Sistema operativo sólo si estamos como Oracle|
 
+# 16-feb
+
+
+## Juego de caracteres
+
+El ideal implementado por Oracle es `AL32UTF8` porque es dinámico respecto al uso de almacenamiento.
+
+<div><img src="imagenes/juegoCaracteres.png"></div>
+
+Dependiendo el caracter puede variar desde 1 byte o más. o menos.
+
+## Zona horaria
+Si no se configura la zona horaria en la BD entonces se configura la del Sistem Operativo.
+
+**Ofset** Es muy importante para sistemas en donde las fechas y horas son muy importantes. Es la diferencia horaria, en este caso `-2 horas` o algo semejante.
+
+<div><img src="imagenes/ofset.png"></div>
+
+* **Bloque de datos**. Normalmente separa el disco en diferentes bloques, a esto se le conoce como `Página de disco` (normalmente es para los DataFiles)
+
+    Es la división de los pedazos de ese tamaño. Estos pedacitos.
+
+    Particiones de la maquina `df -h`
+
+    <div><img src="imagenes/bloqueMemoria.png"></div>
+
+    No es bueno tener un espacio tan grande porque se desperdicia espacio en disco. Se tendrán huecos muy grandes desperdiciado haciendo que no se use correctamente el disco. Este valor se almacena en **db_block_size=4096**. **UNA VEZ CREADA LA BD EL TAMAÑO DE BLOQUE NO SE PUEDE MODIFICAR**
+
+* Definir tamaño para almacenar **Redologs** para ver el tamaño establecido podemos usar. `select blocksize v$sysstat`.
+
+|||
+|--|--|
+|`df -h`|Lista las particiones de los datos|
+|`sudo blockdev --getbsz /dev/sda5`|Ver tamaño de bloque, en este caso nos mostraría la unidad mínima de lectura y escritura en nuestra BD. Normalmente está asociado al valor de nuestro SO. Este parametro está en **db_block_size=4096**|
+|`show parameter db_block_size`|Nos muestra el valor del tamaño de bloque|
+
+## Tablespace
+
+De forma lógica se guardan como tablas, pero en forma lógica es guardan en forma de bloque, algo completamente diferente al formato tabular
+
+<div><img src="imagenes/tableSpace.png"></div>
+
+
+* **Relacion Tabla y Tablespace**
+    Una tabla se asocia a un tablespace. Es un mapeo que nos permite decir en que datafiles podemos almacenar los datos de una tabla.
+
+    Los datos de una tabla pueden estar en más de un datafile si el tablespace lo indica.
+
+    **Todas las tablas deben tener su tablespace**
+
+    <div><img src="imagenes/tableSpace2.png"></div>
+
+Por lo menos se deben crear 2 tablespaces, el **system** y el **sysaux**. Cuando se configura el TS se especifica el tamaño inicial y final
+
+Los componentes **core** se almacenan en **system** los datos adicionales hacia los core se almacenan en **sysaux**
+
+Debe haber un tablespaces donde los usuarios guarden sus propios datos, si no se crean entonces se irán almacenando en **system** sin embargo esto es una mala práctica.
+
+<div><img src="imagenes/tableSpace3.png"></div>
+
+La idea es que el usuario tenga su tablespace:
+
+<div><img src="imagenes/tableSpace4.png"></div>
+
+```
+su -l oracle
+cd $ORACLE_HOME
+cd $ORACLE_BASE
+ls
+cd oradata/
+ls -lh
+```
+
+Los archivos con la terminación `dbf` son los datafiles. Normalmente al crearse la base de datos se le asigna una capacidad de 1GB a System y Sysaux
+
+<div><img src="imagenes/tableSpace5.png"></div>
+
+Cada aplicación que corra en su BD debería tener su propio diseño de tablespace y datafile. Todo esto debe ser diseñado.
+
+Tablespace **undo**. RollBack nos permite regresar al punto anterior. si se tiene una transacción muy larga y se hace un rollback entonces todas ellas se descartan y volvemos a la versión anterior. Esto lo obtiene del tablespace **undo** que es donde se almacenará toda la o las versiones anteriores. 
+
+Las buenas prácticas mencionan que deberiamos tener almenos los siguientes tablespaces:
+
+|Nombre|Lo que almacena|
+|--|--|
+|`system`|Todos los archivos core|
+|`sysaux`|Todos los archivos alrededor de core|
+|`systmp`|Todos los archivos temporales de sesion|
+|`users01`|Todos los archivos generados por el usuario o aplicación|
+|`undo`|Toda la información  referente a la versión anterior, para que el rollback recurra a este tablespace|
+
+# Creacion de la BD empleando la instrucción DataBase
+
+A partir de este punto hay que usar el comando `export ORACLE_SID=ymmbda#`
+
+## Simulación de discos con LoopDevice
+
+Un **Loopdevice** es un archivo binario donde podemos almacenar datos, este archivo físico podemos utilizarlo como un disco. Permite simular discos mediante el `LoopDevice` para ello primero hay que crear el archivo físico y configurarlo. Podemos crear tantos LoopDevices como queramos con el comando `mknod`
+
+Un sistema de archivos UNIX tenemos una estructura jerarquica iniciando por el directorio raíz.
+
+<div><img src="imagenes/unix.png"></div>
+
+Mapeo de **punto de montaje**, todo lo que esté debajo de `u01` no se montará dentro del archivo raíz, sino que será dentro de **U01**
+
+<div><img src="imagenes/mapeoMontaje.png"></div>
+
+Con el comando `mount`le decimos que el contenido de `U01` se monte.
 
 `https://codeshare.io/9OQRL8`
