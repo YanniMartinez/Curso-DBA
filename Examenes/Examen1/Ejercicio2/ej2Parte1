@@ -1,0 +1,60 @@
+#Parte 1
+#Generar el código que se especifica en cada uno de los siguientes puntos:
+#a. Se desea crear una nueva base de datos llamada qa.unam.mx Para ello, crear un shell script que genere un archivo de parámetros con los valores mínimos necesarios así como el parámetro memory_target con 2GB de RAM. Posteriormente iniciar una nueva instancia en modo mount. Emplear la ubicación y nombre estándar. 
+
+#!bin/bash
+echo "1. Creando un archivo de parámetros básico"
+export ORACLE_SID=qa.unam.mx
+pfile=$ORACLE_HOME/dbs/init${ORACLE_SID}.ora 
+
+if [ -f "${pfile}" ]; then
+  #El comando read -P actua como un Scanf de C pero en este caso sólo es para hacer
+  #Una pequeña pausa y seguir adelante con el programa
+  read -p "El archivo ${pfile} ya existe, [enter] para sobrescribir"
+fi;
+
+#El comando  "">$pfile lo que hace es transferir el contenido de la cadena al archivo.
+#que se indica despues del caracter >
+echo \
+"db_name='${ORACLE_SID}'
+memory_target=2048M
+control_files=(/unam-bda/d01/app/oracle/oradata/${ORACLE_SID^^}/control01.ctl,
+               /unam-bda/d02/app/oracle/oradata/${ORACLE_SID^^}/control02.ctl,
+               /unam-bda/d03/app/oracle/oradata/${ORACLE_SID^^}/control03.ctl)
+" >$pfile
+
+echo "Listo"
+echo "Comprobando la existencia y contenido del PFILE"
+echo ""
+cat ${pfile} #Muestra el contenido del PFILE
+
+
+#b. Considerando que por default el usuario sys es el único que puede consultar las vistas dinámicas del diccionario de datos (v$), generar un script que inicie una sesión, genere una tabla llamada t01_data asignada al usuario admin03 que contnga los nombres de todos los parámetros cuya única opción para alterar su valor es a través de la instrucción alter system a nivel del SPFILE 
+connect sys as sysdba
+
+create table admin03.t01_data(
+    name VARCHAR2(80)
+)
+
+insert into admin03.t01_data(name) values
+(select * from v$parameter where ISSES_MODIFIABLE='FALSE');
+
+
+
+/*** parte 2********/
+
+--Cambiar el valor del parámetro parallel_min_percent a 10. Su valor debe ser reflejado a nivel sesión, para todos los usuarios en sesión y de forma permanente.
+alter system set parallel_min_percent=10 scope=both
+
+--b Este parámetro no permite la modificación a nivel sesión
+
+--c
+alter system set sql_trace=true scope=both
+
+--d 
+alter system set cpu_count=5 scope=memory
+
+--echo
+alter session set db_create_file_dest=/tmp 
+alter system set db_create_file_dest=/u01/app scope=memory
+alter system set db_create_file_dest=/u02/app scope=spfile

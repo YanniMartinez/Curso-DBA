@@ -1,0 +1,15 @@
+ORACLE_HOME:    /u01/app/oracle/product/19.3.0/dbhome_1
+System name:    Linux
+Node name:      pc-ymm.fi.unam
+Release:        5.4.17-2136.302.7.2.2.el8uek.x86_64
+Version:        #2 SMP Fri Jan 28 20:03:52 PST 2022
+Machine:        x86_64
+Using parameter settings in server-side spfile /u01/app/oracle/product/19.3.0/dbhome_1/dbs/spfileymmbda2.ora
+System parameters with non-default values:
+  memory_target            = 768M
+  control_files            = "/unam-bda/d01/app/oracle/oradata/YMMBDA2/control01.ctl"
+  control_files            = "/unam-bda/d02/app/oracle/oradata/YMMBDA2/control02.ctl"
+  control_files            = "/unam-bda/d03/app/oracle/oradata/YMMBDA2/control03.ctl"
+  db_securefile            = "PREFERRED"
+  db_name                  = "ymmbda2"
+2022-04-15T22:41:23.975743-05:00

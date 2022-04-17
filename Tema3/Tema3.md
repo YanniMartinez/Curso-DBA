@@ -9,12 +9,18 @@ Para que un usuario pueda iniciar sesion debió cumplirse todos los pasos anteri
 Se puede levantar la instancia mediante métodos como:
 
 * SQL*Plus
-* A través de Oracle Restart. (normalmente usado en la nube)
-* A traves de Recovery Manager (RNAM)
+* A través de Oracle Restart. (normalmente es un script que puede correr de parte del SO para iniciar la instancia)
+* A traves de Recovery Manager (RNAM permite hacer respaldos y recuperar una instancia tras una falla)
 * Oracle Enterprise Manager cloud
 
+## Startup
+
+Puede ir acompañado mediante un PFILE o SPFILE, por ejemplo la siguiente sintaxis:
+
+`startup=/u01/oracle/dbs/mySpfile.ora`
+
 ## Etapas del startup
-shutdown --> nomount --> mount --> open.
+shutdown --> nomount (instancia iniciada) --> mount (abre el archivo de control) --> open (se abre la base de datos)
 
 Cuando se utiliza el **nomount** la base de datos busca los siguientes parametros en este orden:
 

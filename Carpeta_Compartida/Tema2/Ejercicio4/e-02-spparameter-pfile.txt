@@ -1,0 +1,17 @@
+ymmbda2.__data_transfer_cache_size=0
+ymmbda2.__db_cache_size=176160768
+ymmbda2.__inmemory_ext_roarea=0
+ymmbda2.__inmemory_ext_rwarea=0
+ymmbda2.__java_pool_size=4194304
+ymmbda2.__large_pool_size=4194304
+ymmbda2.__oracle_base='/u01/app/oracle'#ORACLE_BASE set from environment
+ymmbda2.__pga_aggregate_target=281018368
+ymmbda2.__sga_target=524288000
+ymmbda2.__shared_io_pool_size=16777216
+ymmbda2.__shared_pool_size=306184192
+ymmbda2.__streams_pool_size=0
+ymmbda2.__unified_pga_pool_size=0
+*.control_files='/unam-bda/d01/app/oracle/oradata/YMMBDA2/control01.ctl','/unam-bda/d02/app/oracle/oradata/YMMBDA2/control02.ctl','/unam-bda/d03/app/oracle/oradata/YMMBDA2/control03.ctl'
+*.db_name='ymmbda2'
+*.db_securefile='PREFERRED'
+*.memory_target=768M
