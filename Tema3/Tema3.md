@@ -207,9 +207,31 @@ Para ello tenemos los siguientes comandos:
     - Se salta la sincronización, se debe realizar una recuperación, normalmente es durante una emergencia.
 
 
+## Innactivar una base de datos
 
-* Innactiva la instancia: 
+- Es una manera de innactivar pero no es tan agresivo como el modo restrictivo. Permite realizar sólo operaciones de administración.
+- Si lo activamos i existen sesiones activas, les permite continuar hasta que termine la actividad en ejecución.
+- Si existen sesiones inactivas, estas no se desconectan pero no les permite realizar transacciones, impide que la BD se vuelva activa.
+- Los usuarios **sin** privilegios que intenten acceder quedarán en modo espera hasta que la base esté activa.
+- Usuarios administrativos pueden iniciar sesion de forma normal.
+- El estatus de innactividad se puede consultar en **v$instance** con el attributo **active_state**
+
+- *unicamente el usuario sys y system pueden inactivar la instancia usando el siguiente comando*
+
     `alter system quiesce restricted;`
 
-* `Shutdown inmediate` detiene todas las transacciones, y las que se tenian sólo se hacen un rollback para que no afecten.
+La siguiente query puede servi para determinar las sesiones activas que pueden impedir la inactividad de la BD:
 
+```
+select bl.sid, user, ouser, type, program
+from v$blocking_quiesce bl, v$session se
+where bl.sid=se.sid
+```
+
+para eliminar una sesión se puede emplear el siguiente comando:
+
+`alter system kill session 'sid,serial#'`
+
+Para quitar el modo inactivo podemos usar el siguiente comando:
+
+`alter system unquiesce;`

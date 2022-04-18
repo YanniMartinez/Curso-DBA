@@ -29,3 +29,9 @@ select name,value from v$diag_info;
 
 Primero autenticar con el usuario, y luego realizar la siguiente consulta:
 `select object_name, object_type from user_objects`
+
+## Eliminar una sesion:
+
+para eliminar una sesión se puede emplear el siguiente comando:
+
+`alter system kill session 'sid,serial#'`
