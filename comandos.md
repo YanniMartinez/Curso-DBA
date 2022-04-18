@@ -23,3 +23,9 @@ col name format a25
 col value format a70
 select name,value from v$diag_info;
 ```
+
+
+## Ver objetos de un usuario
+
+Primero autenticar con el usuario, y luego realizar la siguiente consulta:
+`select object_name, object_type from user_objects`
