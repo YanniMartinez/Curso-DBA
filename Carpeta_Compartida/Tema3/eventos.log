@@ -1,0 +1,22 @@
+idle> 
+idle> shutdown immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+idle> 
+idle> startup
+ORACLE instance started.
+
+Total System Global Area  805303360 bytes                                       
+Fixed Size                  8901696 bytes                                       
+Variable Size             595591168 bytes                                       
+Database Buffers          192937984 bytes                                       
+Redo Buffers                7872512 bytes                                       
+Database mounted.
+Database opened.
+idle> 
+idle> shutdown transactional
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+idle> spool off;

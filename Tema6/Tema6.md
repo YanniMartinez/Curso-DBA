@@ -1,6 +1,46 @@
 # Tema 6 Parte 1 Administracion de las estructuras lógicas de almacenamiento
 
+* Estructuras lógicas de almacenamiento
+* Estructuras físicas
 
+Las estructuras lógicas de almacenamiento son reconocidas unicamente por la base de datos, no por todo el SO.
+
+### Logica para entender relaciones entre las estructuras:
+
+* Una extensión que conforma por un conjunto de bloques.
+
+* El segmento es un conjunto de extensiones. Cada segmento se asocia con un objeto por ejemplo una tabla.
+
+* Tablespace es un conjunto de segmentos.
+
+* Un tablespace puede estár formados o asociados por distintos datafiles.
+
+Un datafile es una estructura física y el tablespace es lógico.
+
+Un datafile está formado por un conjunto de extensiones.
+
+Un bloque (logico) se liga con un bloque del SO.
+
+Normalmente si la tabla se llama estudiante el segmento también se llamará así.
+
+
+¿Cuanto espacio tiene almacenado un tabla? podemos ver cuantas extensiones tien la tabla asignada, vemos los bloques y obtenemos el almacenamiento.
+
+Cada segmento se le asigna a un objeto (tabla), cad auno de ellos tiene tuplas o columnas.
+
+
+## Bloques de datos
+
+Es la unidad minima de lectura y escritura.
+`db_blocksize` define la cantidad del espacio.
+
+El header contiene informacion como dirección de disco, tipo de segmento, informacion de direcciones.
+
+* Table directory
+
+* Row directory
+
+En el header se muestra si el bloque requiere de un recovery, etc.
 
 ### Ejemplo
 
@@ -189,3 +229,95 @@ El SWAP actua como una memoria RAM, interviene cuando la RAM del dispositivo est
 * A cada usuario se le asocia un tablespace temporal, el mismo tablespace puede ser empleado por múltiples usuarios.
 
 ## Segmentod UNDO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Automatic Segment Space Management (ASSM)
+
+Se decide si hay suficiente espacio para una extensión dependiendo del número de bloques, en el momento en el que vemos si hay espacio o no es cuando vemos el estatos del bloque.
+
+Para realizar la administración de los bloques de datos en el **bitmap** se consideran los siguientes estados:
+
+
+* Bloque ubicado arriba de la marca de agua: Significa que el bloque está libre, nunca se ha
+empleado, y no está formateado.
+* Bloque ubicado abajo de la marca de agua: Se divide a su vez en 3 posibles estados:
+    * Se reservó para ser empleado pero aún no ha sido formateado ni usado.
+    * Formateado y contiene datos.
+    * Formateado y vacío debido a que sus datos fueron eliminados.
+
+Se va estableciendo una marca de agua conforme va ingresando datos. siempre se reservará el primer espacio de cada sección y a esto se le conoce como nuestro **bitmap** y tras ese valor es cuando asignamos más elementos. El primer elemento se llama `low High Water Mark` y el final es el `High water Mark`. Llega un momento en el que las 2 marcas coinciden entonces el `High Water Mark`se van poblando las marcas.
+
+Notar la existencia de una nueva marca llamada low high water mark. Indica el punto hasta el cual todos los bloques han sido formateados ya sea porque contienen datos o están vacíos con formato porque se realizó alguna operación de eliminación de datos.
+
+Notar que low High Water mark permanence en la posición indicada en la figura a pesar de existir bloques con datos a la derecha. Recordando, todos los bloques a la izquierda de esta marca deben estar formateados.
+
+La idea general es optimizar el escaneo de datos.
+
+Cuando el espacio entre estas 2 marcas se llena, low high Water Mark toma el lugar de High Water Mark y High Water Mark se mueve hacia la derecha para reservar más bloques.
+
+Garantiza que despues del `High water Mark` ya no hay datos, la presencia de ambas marcas permite que sea un scaner eficiente.
+
+-----------------------------
+## Visualización empleando paquetes PL/SQL
+
+Se usan paquetes porque ya no se almancena en el diccionario de datos sino que están en los bitmaps
+
+|Nombre del paquete/funcion|Descripcion|
+|--|--|
+|dbms_space.unused_space|Obtiene información acerca del espacio no utilizado en un objeto (índice, tabla, o cluster)|
+|dbms_space.free_blocks|Obtiene información de los bloques de datos libres en un objeto con administración basada en listas (administración manual del espacio libre)|
+|dbms_space.space_usage|Obtiene información de los bloques de datos en un objeto con administración automática del espacio libre.|
+
+
+[Ejemplo2]()
+
+Recordemos que tenemos variables de entrada y variables de salida. Recordemos que las: 
+
+* Variables de entrada: 
+
+* Variables de salida: Si le paso una variabe como parametro de salida, el procedimiento es modificar el valor de la variable desde fuera del procedimiento. (En general escribe el estatus del bloque en distintas variables)
+
+Cuando se pasa el `=>` es el parametro o atributo que se modificará. 
+
+Al crear una tabla se le asigna almenos una extensión aun cuando no tenga datos. El espacio de bloque para nuestra instancia 2 es de `8k`, si le indicamos 10 bloques entonces el `total_block` nos devolverá 80ks.
+
+
+La otra manera de hacerlo es consultando las vistas del diccionario de datos y son **muy importantes**
+
+
+## Vistas del diccionario de datos asociadas con el uso de espacio de almacenamiento
+
+**EJEMPLO**
+Pregunta tipica ¿Cuanto espacio en disco usa una tabla? Sabemos que la tabla tenga asignado el segmento estudiante y ese segmento está formado por extensiones. Podriamos contar las extensiones. Ejemplo 4 extensiones de varios bloques. Podemos ver el numero de bloques por extensión por ejemplo 4 bloques por extensiones y si cada bloque pesa 8k entonces tendriamos 128ks.
+
+
+Con las vistas de los diccionarios podemos ver cuantos bloques tiene reservada la tabla teniendo o no datos.
+
+
+Ejemplo:
+
+[Ejemplo3 Vistas](Ejemplo3.sql) en este ejemplo podemos ver el numero de bloques, extensiones y de bytes segun el usuario JORGE.
+
+[Ejemplo4 Vistas2](Ejemplo4.sql) aqui podemos ver a más detalles el numero de extensiones con su número de id, el número de bloques, de bytes y el tipo de segmento.
+
+[Ejercicio de clase](EjercicioClase.sql) Constituye el ejemplo construido en clase.

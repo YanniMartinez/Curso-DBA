@@ -1,0 +1,36 @@
+--t01_sga_components
+CREATE TABLE yanni0401.t01_sga_components
+(
+    memory_target_param NUMBER(12,2),
+    fixed_size NUMBER(12,2),
+    variable_size NUMBER(12,2),
+    database_buffers NUMBER(12,2),
+    redo_buffers NUMBER(12,2),
+    total_sga NUMBER(12,2)
+)
+
+INSERT into yanni0401.t01_sga_components (
+    memory_target_param, fixed_size, variable_size, database_buffers, redo_buffers, total_sga)
+    VALUES (
+        (select value/1024/1024 from v$spparameter where name='memory_target';),
+        (SELECT value/1024/1024 FROM v$SGA where name="Fixed_size"),
+        (SELECT value/1024/1024 from v$SGA where name="Variable_size"),
+        (SELECT value/1024/1024 from v$SGA where name="Database_buffers"),
+        (SELECT value/1024/1024 from v$SGA where name="Redo_buffers" ),
+        (SELECT sum(value)/1024/1024 from v$SGA )
+);
+
+--*B
+create table yanni0401.t02_sga_dynamic_components(
+    component_name varchar2(64),
+    current_size_mb number(10,2),
+    operation_count number(10,0),
+    last_operation_type varchar2(13),
+    last_operation_time date
+);
+
+INSERT 
+INTO temporal
+SELECT component, current_size/1024/1024, oper_count/1024/1024, last_oper_type, last_oper_time
+from  v$sga_dynamic_component order by current_size desc;
+--/opt/sqldeveloper/sqldeveloper.sh &
