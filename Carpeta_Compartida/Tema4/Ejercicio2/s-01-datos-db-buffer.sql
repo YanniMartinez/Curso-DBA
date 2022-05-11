@@ -10,7 +10,7 @@ CREATE TABLE yanni0402.t01_sga_components
   prev_size NUMBER(10,2),
   prev_buffers NUMBER(10,2),
   default_pool_size varchar2(255)
-)
+);
 
 INSERT into yanni0402.t01_db_buffer_cache (
     block_size, current_sizee, buffers,  target_buffers, prev_size, prev_buffers,default_pool_size)

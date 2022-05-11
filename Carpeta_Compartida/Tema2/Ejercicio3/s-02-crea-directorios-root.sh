@@ -1,4 +1,7 @@
-
+#!/bin/bash
+# @Autor Martinez Martinez Yanni
+# @Fecha 06/03/2022
+# @Descripcion Creación de directorios para roor
 
 export ORACLE_SID=ymmbda2
 cd /u01/app/oracle/oradata

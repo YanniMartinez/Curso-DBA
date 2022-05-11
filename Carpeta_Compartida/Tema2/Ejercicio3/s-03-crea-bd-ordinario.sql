@@ -1,3 +1,6 @@
+--@Autor: Martínez Martínez Yanni
+--@Fecha creación: 06/03/2022
+--@Descripción: Creación de BD ordinaria en base a parametros fundamentales
 
 --! NOTA:
 --Conectando como sys empleando el archivo de passwords creado anteriormente

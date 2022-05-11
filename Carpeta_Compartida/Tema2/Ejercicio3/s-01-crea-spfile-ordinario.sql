@@ -1,4 +1,6 @@
-
+--@Autor: Martínez Martínez Yanni
+--@Fecha creación: 06/03/2022
+--@Descripción: Creación de directorios en root
 
 --Conectando como sys empleando el archivo de passwords creado anteriormente
 --Con un usuario ordinario

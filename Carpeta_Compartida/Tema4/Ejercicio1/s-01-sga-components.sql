@@ -7,16 +7,16 @@ CREATE TABLE yanni0401.t01_sga_components
     database_buffers NUMBER(12,2),
     redo_buffers NUMBER(12,2),
     total_sga NUMBER(12,2)
-)
+);
 
 INSERT into yanni0401.t01_sga_components (
     memory_target_param, fixed_size, variable_size, database_buffers, redo_buffers, total_sga)
     VALUES (
-        (select value/1024/1024 from v$spparameter where name='memory_target';),
-        (SELECT value/1024/1024 FROM v$SGA where name="Fixed_size"),
-        (SELECT value/1024/1024 from v$SGA where name="Variable_size"),
-        (SELECT value/1024/1024 from v$SGA where name="Database_buffers"),
-        (SELECT value/1024/1024 from v$SGA where name="Redo_buffers" ),
+        (select value/1024/1024 from v$spparameter where name='memory_target'),
+        (SELECT value/1024/1024 FROM v$SGA where name='Fixed Size'),
+        (SELECT value/1024/1024 from v$SGA where name='Variable Size'),
+        (SELECT value/1024/1024 from v$SGA where name='Database Buffers'),
+        (SELECT value/1024/1024 from v$SGA where name='Redo Buffers' ),
         (SELECT sum(value)/1024/1024 from v$SGA )
 );
 
